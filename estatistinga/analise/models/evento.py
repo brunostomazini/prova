@@ -2,8 +2,8 @@ from django.db import models
 from .base_model import BaseModel
 from ..enumerations import Esporte
 from django.core.validators import MinLengthValidator, MinValueValidator
-from django.core.exceptions import ValidationError
-from django.utils import timezone
+from ..validators import event_date_validator
+from ..managers import EventoManager
 
 
 class Evento(BaseModel):
@@ -27,7 +27,7 @@ class Evento(BaseModel):
         validators=[MinLengthValidator(2)]
     )
 
-    data = models.DateField()
+    data = models.DateField(validators=[event_date_validator])
 
     esporte = models.CharField(max_length=20, choices=Esporte)
 
@@ -47,10 +47,6 @@ class Evento(BaseModel):
     created_at = models.DateField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.nome} - {self.esporte} - {self.cidade} - {self.pais} - {self.data.strftime("%d/%m/%Y")}"
+        return f"{self.id} {self.nome} - {self.esporte} - {self.cidade} - {self.pais} - {self.data.strftime("%d/%m/%Y")}"
 
-    def clean(self):
-        super().clean() #Lança as validações do da classe pai, garantindo as validações do pai
-        today = timezone.localdate()
-        if self.data <= today:
-            raise ValidationError("A data marcada para o evento já passou, escolha outra data.")
+    objects = EventoManager()

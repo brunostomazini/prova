@@ -2,7 +2,8 @@ from django.db import models
 from .base_model import BaseModel
 from django.core.validators import MinLengthValidator, MinValueValidator, MaxValueValidator
 from ..enumerations import Esporte
-
+from ..validators import age_validator
+from ..managers import AtletaManager
 
 class Atleta(BaseModel):
     nome = models.CharField(
@@ -21,7 +22,14 @@ class Atleta(BaseModel):
         max_length=100,
         validators=[MinLengthValidator(2)]
     )
-    nascimento = models.DateField(verbose_name="Data de nascimento")
+    nascimento = models.DateField(
+        verbose_name="Data de nascimento",
+          validators=[age_validator]
+          )
+    nacionalidade = models.CharField(
+        max_length=50,
+        validators=[MinLengthValidator(5)]
+        )
     altura = models.IntegerField(
         verbose_name="Altura", 
         validators=[MaxValueValidator(250)]
@@ -34,6 +42,10 @@ class Atleta(BaseModel):
         )
     esporte = models.CharField(verbose_name="Esporte", max_length=20, choices=Esporte)
     ativo = models.BooleanField(verbose_name="Ativo", default=True)
+    
+    objects = AtletaManager()
 
     def __str__(self):
         return f"{self.nome} - {self.esporte}"
+    
+    
